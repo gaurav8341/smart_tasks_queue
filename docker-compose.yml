@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: smartuser
+      POSTGRES_PASSWORD: smartpass
+      POSTGRES_DB: smarttasks
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    image: python:3.11-slim
+    working_dir: /app
+    command: /bin/bash -c "pip install --no-cache-dir -r requirements.txt && alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+    volumes:
+      - ./app:/app
+    environment:
+      - DB_USER=smartuser
+      - DB_PASSWORD=smartpass
+      - DB_NAME=smarttasks
+      - DB_HOST=db
+      - DB_PORT=5432
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
