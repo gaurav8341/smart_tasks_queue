@@ -112,6 +112,51 @@ Should we have seperate Status table?
 - Queue operations should be O(log n) or better
 - Consider indexes carefully
 
+3 tables
+
+1. Jobs
+
+id pk
+Job uuid, indexed column may be based on time instead of uuid   
+job name,
+type,
+active
+payload : json
+status : string # indexed can we have hash index
+cpu_units
+memory_mb
+max_attempts
+backoff_multiplier
+initial_delay
+timeout
+created_time
+modified_time
+created_by
+modified_by
+priority : string can we have selectlist kind of thing eg. Critical: 1, High: 2, Normal: 3, Low: 4 indexed
+times_attempted : no of time this job was attempted but failed
+run_at: Jobs will be considered for queue after this time. # will also help in case of failure and to schedule jobs indexed
+results: Json # log of execution, results and all 
+
+
+
+
+2. Jobs Dependancy
+
+Job_id: foreign_key
+depends_on_id: foreign key jobs
+
+
+3. Execution Logs
+
+job_id : foreign_key jobs
+duration_seconds : decimal
+is_successfull : boolean # execution status
+results : json
+Execution start time : datetime
+execution end time : datetime
+message: text
+
 ## Design Choices. 
 
 This will be one scheduler ie manager process which will basically share jobs with the worker. Worker will be single process, multi thread.
@@ -142,6 +187,8 @@ API service
 Scheduler Service
 
 Worker -- single process -- multiple thread
+
+    # in future should multi process setup. scheduler will send to master process. Master Process will align one of the worker process.
 
 Logger -- In future -- this will log data in log table, message passing through rabbitmq
 
