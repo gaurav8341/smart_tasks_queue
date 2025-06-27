@@ -51,8 +51,8 @@ class Job(Base):
     logs = relationship("ExecutionLog", back_populates="job", cascade="all, delete-orphan", order_by="ExecutionLog.log_timestamp")
  
     # does this make sense as we are accessing job dependancy
-    parent_jobdependancy = relationship("JobDependency", foreign_keys=[JobDependency.dependant_id], backref="dependent_job", cascade="all, delete-orphan")
-    child_jobdependancy = relationship("JobDependency", foreign_keys=[JobDependency.depends_on_id], backref="parent_job", cascade="all, delete-orphan")
+    parent_jobdependancy = relationship("JobDependency", back_populates="dependent_job", cascade="all, delete-orphan")
+    child_jobdependancy = relationship("JobDependency", back_populates="parent_job", cascade="all, delete-orphan")
         
 
     # def update(self, session, **kwargs):
@@ -122,8 +122,8 @@ class JobDependency(Base):
     depends_on_uuid = Column(UUID(as_uuid=True), default=uuid.uuid4)
     
     __table_args__ = (
-        UniqueConstraint('job_id', 'depends_on_id', name='uq_job_dependency_pair'),
-        CheckConstraint('job_id != depends_on_id', name='chk_no_self_dependency') # Requires `from sqlalchemy import CheckConstraint`
+        UniqueConstraint('dependant_id', 'depends_on_id', name='uq_job_dependency_pair'),
+        CheckConstraint('dependant_id != depends_on_id', name='chk_no_self_dependency') # Requires `from sqlalchemy import CheckConstraint`
     )
     
     parent_job = relationship("Job", foreign_keys=[depends_on_id], back_populates="child_jobdependancy")
@@ -138,7 +138,7 @@ class ExecutionLog(Base):
     # worker_id = Column(integer)Need worker id to know which worker did the task
     job_uuid = Column(UUID(as_uuid=True), default=uuid.uuid4) # should be auto populated
 
-    log_timestamp = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), nullable=False)
+    log_timestamp = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), nullable=False, index=True)
 
     message = Column(String, nullable=False)
 
