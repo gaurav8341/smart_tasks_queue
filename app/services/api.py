@@ -3,9 +3,9 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from uuid import UUID
 import asyncio
-from app.models.models import Job, ExecutionLog, JobDependency
-from app.schemas.job_schemas import JobCreate, JobOut, JobLogOut, ExecutionLogOut
-from app.database import get_db
+from models.models import Job, ExecutionLog, JobDependency
+from schemas.job_schemas import JobCreate, JobOut, JobLogOut, ExecutionLogOut
+from database import get_db
 
 # POST /jobs - Submit a new job
 def create_job(job: JobCreate, db: Session = Depends(get_db)):
@@ -25,7 +25,6 @@ def create_job(job: JobCreate, db: Session = Depends(get_db)):
 
     # Handle dependencies if any
     if job.depends_on:
-        from app.models.models import JobDependency, Job
         for dep_uuid in job.depends_on:
             dep_job = db.query(Job).filter(Job.job_id == dep_uuid).first()
             if not dep_job:
@@ -58,7 +57,6 @@ def cancel_job(job_id: UUID, db: Session = Depends(get_db)):
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     # Check if any jobs depend on this job
-    from app.models.models import JobDependency
     dependants = db.query(JobDependency).filter(JobDependency.depends_on_id == job.id).all()
     if dependants:
         raise HTTPException(status_code=400, detail="Cannot cancel: other jobs depend on this job.")
@@ -104,7 +102,6 @@ async def job_stream(websocket: WebSocket, db: Session = Depends(get_db)):
         pass
 
 def job_out_from_db(job, db):
-    from app.models.models import JobDependency, Job
     dependencies = db.query(JobDependency).filter(JobDependency.dependant_id == job.id).all()
     depends_on_uuids = []
     for dep in dependencies:

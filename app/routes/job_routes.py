@@ -3,10 +3,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 from uuid import UUID
 from pytz import all_timezones
-from .. import schemas, crud, models
-from ..database import get_db
-from app.schemas.job_schemas import JobCreate, JobOut, JobLogOut
-from app.services import api as job_api
+# from app. import schemas, crud, models
+from database import get_db
+from schemas.job_schemas import JobCreate, JobOut, JobLogOut
+from services import api as job_api
 
 router = APIRouter()
 
