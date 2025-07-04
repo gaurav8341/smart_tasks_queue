@@ -20,7 +20,6 @@ class RetryConfig(BaseModel):
     initial_delay_seconds: Optional[int] = 0
 
 class JobCreate(BaseModel):
-    job_id: UUID
     job_name: str
     type: Optional[str]
     payload: Optional[Any]

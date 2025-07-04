@@ -242,5 +242,41 @@ What is needed.
 
 
 
+## message brokers 
+
+where its needed
+
+
+
+scheduler to worker
+
+    job.dispatch.job_id
+
+worker to api
+
+    basically for websocket
+
+        <!-- job.logs.stream.<job_id>.<log_level> -->
+
+    job.logs.job_id
+
+
+worker to logger
+
+    log to database
+
+        <!-- job.logs.stream.<job_id>.<log_level> -->
+
+    job.logs.job_id
+
+scheduler to api
+
+    monitoring of queue
+
+    job.monitoring.queue
+
+    job.monitoring.resource
+
+
 
 

@@ -51,8 +51,8 @@ class Job(Base):
     logs = relationship("ExecutionLog", back_populates="job", cascade="all, delete-orphan", order_by="ExecutionLog.log_timestamp")
  
     # does this make sense as we are accessing job dependancy
-    parent_jobdependancy = relationship("JobDependency", back_populates="dependent_job", cascade="all, delete-orphan")
-    child_jobdependancy = relationship("JobDependency", back_populates="parent_job", cascade="all, delete-orphan")
+    parent_jobdependancy = relationship("JobDependency", foreign_keys="JobDependency.dependant_id", back_populates="dependent_job", cascade="all, delete-orphan")
+    child_jobdependancy = relationship("JobDependency", foreign_keys="JobDependency.depends_on_id", back_populates="parent_job", cascade="all, delete-orphan")
         
 
     # def update(self, session, **kwargs):
