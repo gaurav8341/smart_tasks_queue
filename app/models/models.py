@@ -53,58 +53,21 @@ class Job(Base):
     # does this make sense as we are accessing job dependancy
     parent_jobdependancy = relationship("JobDependency", foreign_keys="JobDependency.dependant_id", back_populates="dependent_job", cascade="all, delete-orphan")
     child_jobdependancy = relationship("JobDependency", foreign_keys="JobDependency.depends_on_id", back_populates="parent_job", cascade="all, delete-orphan")
-        
 
-    # def update(self, session, **kwargs):
-    #     """
-    #     Deactivate the current active record of this job_id and create a new one with updated fields.
-    #     This implements the versioning strategy.
-    #     """
-    #     # 1. Deactivate the current active version of this specific job_id
-    #     # Crucially, you need to query for the current ACTIVE version of the job_id,
-    #     # not just reference `self`'s `id`, because `self` might not be the *current active* version
-    #     # if the object was loaded from a prior state.
-    #     current_active_job = session.query(Job).filter(Job.job_id == self.job_id, Job.active == True).first()
-
-    #     if current_active_job:
-    #         current_active_job.active = False
-    #         # No need to session.add(self) here if current_active_job is already session-managed.
-    #         # session.flush() ensures the update is sent to the DB before the insert is attempted.
-    #         session.flush()
-
-    #     # 2. Prepare data for the new version.
-    #     # Copy relevant data from the original (or current active) job record.
-    #     # Exclude 'id' as it's auto-incremented, and 'active' will be set to True.
-    #     # Ensure 'job_id' (the logical ID) is carried over.
-        
-    #     # Collect existing data (from current_active_job if found, otherwise from self)
-    #     source_job = current_active_job if current_active_job else self 
-        
-    #     new_data = {
-    #         c.name: getattr(source_job, c.name)
-    #         for c in source_job.__table__.columns
-    #         if c.name not in ['id', 'active', 'created_time', 'modified_time']
-    #     }
-        
-    #     # Override with new values from kwargs and set active to True
-    #     new_data.update(kwargs)
-    #     new_data['active'] = True
-    #     new_data['created_time'] = datetime.now(timezone.utc) # New version's creation time
-    #     new_data['modified_time'] = datetime.now(timezone.utc) # New version's modified time
-
-    #     new_job_version = Job(**new_data)
-    #     session.add(new_job_version)
-
-    #     # IMPORTANT: Session management (commit/rollback) should typically be handled by the caller
-    #     # (e.g., in your API endpoint or service layer).
-    #     # Removing `session.commit()` from here makes the method reusable within larger transactions.
-    #     # If you keep commit here, ensure you understand its implications for atomicity.
-    #     # session.commit()
-        
-    #     # Refresh the new object to get its `id` if needed immediately
-    #     # session.refresh(new_job_version)
-        
-    #     return new_job_version
+    def to_dict(self):
+        """
+        Converts the Job object to a dictionary, handling UUID and datetime objects.
+        """
+        data = {}
+        for column in self.__table__.columns:
+            value = getattr(self, column.name)
+            if isinstance(value, uuid.UUID):
+                data[column.name] = str(value)
+            elif isinstance(value, datetime):
+                data[column.name] = value.isoformat()
+            else:
+                data[column.name] = value
+        return data
 
 class JobDependency(Base):
     __tablename__ = 'job_dependencies'

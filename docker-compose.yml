@@ -13,7 +13,18 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
   
-  # rabbitmq
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
   # scheduler
   # worker
 
@@ -30,10 +41,16 @@ services:
       - DB_HOST=db
       - DB_PORT=5432
       - PYTHONUNBUFFERED=1
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASS=guest
     ports:
       - "8000:8000"
     depends_on:
       - db
+      - rabbitmq
 
 volumes:
   postgres_data:
+  rabbitmq_data:
